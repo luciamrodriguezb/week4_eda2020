@@ -1,0 +1,64 @@
+---
+title: "EDA_week4excercise"
+author: "Lucia M Rodriguez Bravo"
+date: "2/18/2020"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    theme: united
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This code is an excercise for the R class taught at UABC on Spring 2020. It is meant to tidy a database.
+
+# Data extraction
+First we're calling the package to be used
+```{r}
+library(tidyverse)
+library(dbplyr)
+```
+
+Second, calling up the dataset from a csv file 
+```{r}
+MessyData<-read.csv("week4/data/CompDec2011_2015.csv",na.strings = "missing")
+#Note that on some sets NA values fill empty spaces, while others have "missing" written. The Addition of na.strings="missing" corrects this
+```
+
+The data consists of frequency of fish observed in the month of December per site per year.
+
+# Data transformation
+The data is in wide format. Next, it will be transformed to long format
+```{r}
+TidyData<-pivot_longer(MessyData, -c("DISTINCT.SPP.LIST","Month"), names_to=c("Site","Year"), names_sep="\\.", values_to="Quantity",values_drop_na = TRUE)
+```
+
+Notes on this code: 
+Originally the code was written as follows:
+```{r}
+#TidyData<-pivot_longer(MessyData, X119.2011:X89.2013, names_to=c("Site","Year"), names_sep="\\.", values_to="Quantity")
+```
+To include rather than exclude data (Xthis:Xthat versus -c("A","B) ) resulted in too many columns.
+The addition of values_drop_na=TRUE eliminates unnecessary rows by not including NAN values.
+
+# Data processing
+The next task is to only have data from 2011
+```{r}
+TidyData2011<-filter(TidyData,Year==2011)
+```
+Since the Month column is redundant, we'll get rid of it
+```{r}
+TidyData2011<-select(TidyData2011,Species=DISTINCT.SPP.LIST,Year,Site,Quantity)
+```
+Note also that I chose to change the name of the species column to something I liked better :)
+A little fact checking:
+```{r}
+str(TidyData2011)
+unique(TidyData2011$Year)
+```
