@@ -1,0 +1,74 @@
+---
+title: "EDA_week4excercise2"
+author: "Lucia M Rodriguez Bravo"
+date: "2/18/2020"
+output:
+  html_document:
+    theme: united
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# TidyFish part 2
+
+## Data extraction
+First we're calling the packages to be used
+```{r}
+library(tidyverse)
+library(dbplyr)
+```
+
+Second, calling up the datasets from a csv file 
+```{r}
+A<-read.csv("week4.2/data/FishAb.csv")
+B<-read.csv("week4.2/data/FishAbtrscts.csv")
+C<-read.csv("week4.2/data/SppCodes.csv")
+```
+Exploring:
+```{r}
+str(A)
+str(B)
+str(C)
+```
+
+## Tidying the datasets
+I will need to:
+
+1.extract fish smaller than 20cm (dataset A)
+2. add them by date, site and species (date+site B, species A)
+
+Dataset C has no relevant information.
+
+  For dataset A, we need to filter fish bigger than 20cm.
+Since total length (TL) is no longer relevant, it can be done away with.
+```{r}
+A<-filter(A,TL<20)
+A<-select(A,Transect,ComName,Freq)
+
+```
+  For dataset B, we need to reduce it to the variables we care about. 
+Since both datasets share transect number as a variable, the name gets standardized on this step too
+```{r}
+B<-select(B,Transect=TransectNum,Date,Site)
+```
+  After both datasets got cleaned up, they can be joined by their shared variable (Transect), which can then be done away with
+```{r}
+Fish<-left_join(A,B,by="Transect")
+Fish<-select(Fish,-Transect)
+```
+
+## Adding fish counts
+  Our single dataset now has all relevant information, but fish counts are still broken up, so we add them
+```{r}
+Fish<-aggregate(Fish$Freq,by=list(Fish$ComName,Fish$Date,Fish$Site),sum)
+Fish<-rename(Fish,ComName=Group.1,Date=Group.2,Site=Group.3,Freq=x)
+```
+Note: aggregate renamed my columns, which I undid by re-renaming them rather than figuring out why. It works :) I am also pretty sure this isn't how I was supposed to do this but I did and I'm reasonably sure it's correct.
+```{r}
+str(Fish)
+```

@@ -14,7 +14,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## TidyFish part 1
 
 This code is an excercise for the R class taught at UABC on Spring 2020. It is meant to tidy a database.
 
@@ -57,6 +57,7 @@ Since the Month column is redundant, we'll get rid of it
 TidyData2011<-select(TidyData2011,Species=DISTINCT.SPP.LIST,Year,Site,Quantity)
 ```
 Note also that I chose to change the name of the species column to something I liked better :)
+
 A little fact checking:
 ```{r}
 str(TidyData2011)
